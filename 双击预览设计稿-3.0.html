@@ -1,0 +1,176 @@
+<!doctype html>
+<html class="no-js">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+
+    <title>你正在通过浏览器查看当前设计稿 - 设计稿查看组件</title>
+
+    <script src="http://libs.baidu.com/jquery/1.11.3/jquery.js"></script>
+
+    <style>
+        html,body{
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: #232323;
+        }
+        .view{
+            width: 100%;
+            height: 100%;
+            text-align: center;
+        }
+        .nav{
+            background-color: #cf2d27;
+            width: 100px;
+            position: fixed;
+            right: 50px;
+            bottom: 50px;
+        }
+        .nav a{
+            display: block;
+            padding: 5px;
+            color: #EEEEF3;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .nav a:hover{background-color: #0a6999}
+        .nav span{
+            color: #232323;
+            background-color: #d1d1d1;
+            font-size: 12px;
+            padding: 5px;
+            display: block;
+            cursor: default;
+        }
+        .control{
+            width: 30px;
+            position: fixed;
+            right: 10px;
+            bottom: 10px;
+        }
+        .control a{
+            background-color: #cf2d27;
+            display: block;
+            width: 30px;
+            height: 30px;
+            -webkit-border-radius: 15px;
+            -moz-border-radius: 15px;
+            border-radius: 15px;;
+            margin-bottom: 5px;
+        }
+        .control img{
+            width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+
+<div class="view">
+    <img id="ViewPic" src="images/introduce.png"/>
+</div>
+
+<div class="nav"></div>
+<!--<div class="nav">-->
+    <!--<span>电脑版</span>-->
+    <!--<a href="javascript:void(0);">首页</a>-->
+    <!--<a href="javascript:void(0);">关于天山</a>-->
+    <!--<a href="javascript:void(0);">新闻资讯</a>-->
+    <!--<a href="javascript:void(0);">产品介绍</a>-->
+    <!--<a href="javascript:void(0);">工程案例</a>-->
+    <!--<a href="javascript:void(0);">技术中心</a>-->
+    <!--<span>移动版</span>-->
+    <!--<a href="javascript:void(0);">首页</a>-->
+    <!--<a href="javascript:void(0);">频道页</a>-->
+<!--</div>-->
+
+<div class="control">
+    <a id="GoHome" href="javascript:void(0);"><img src="images/home.png"/></a>
+    <a id="SwitchNav" href="javascript:void(0);"><img src="images/rightdown.png"/></a>
+</div>
+</body>
+<script>
+    var dataJson = {
+        "说明":"introduce.png",
+        "电脑版":{
+            "首页":"pc/1首页.jpg",
+            "关于天山":"pc/2关于天山.jpg",
+            "新闻资讯":"pc/3新闻资讯.jpg",
+            "产品介绍":{
+                "产品介绍A":"pc/4产品介绍.jpg",
+                "产品介绍B":"pc/4产品介绍.jpg"
+            },
+            "工程案例":"pc/5工程案例.jpg",
+            "技术中心":"pc/6技术中心.jpg"
+        },
+        "移动版":{
+            "首页":"mobile/首页.jpg",
+            "频道页":"mobile/频道页.jpg"
+        }
+    };
+// 单层for in 循环，判断当前对象的值是不是{}，如果是的话，先创建一个名字为当前对象的span，然后在从头循环当前对象的值（因为它是{}啊），如果不是，直接创建一个名字为当前对象的a。
+    function json2dom(data,parent){
+        for (var attr in data){
+            if(data[attr]) {
+                if (JSON.stringify(data[attr]).indexOf("{") !== -1) {//判断是否{}对象，是的话继续循环
+                    var span = document.createElement('span');
+                    var node = document.createTextNode(attr);
+                    span.appendChild(node);
+                    parent[0].appendChild(span);
+                    json2dom(data[attr], parent);//再次调用
+                }else {
+                    var a = document.createElement('a');
+                    var node2 = document.createTextNode(attr);
+                    var imgsrcValue = data[attr];
+                    var imgsrc = document.createAttribute('imgsrc');
+                    //console.log(imgsrc);
+                    a.appendChild(node2);
+                    a.setAttributeNode(imgsrc);
+                    a.setAttribute("imgsrc",imgsrcValue);
+                    a.href = "javascript:void(0);";
+                    parent[0].appendChild(a);
+                }
+            }
+        }
+    }
+
+    json2dom(dataJson,document.getElementsByClassName("nav"));
+
+    var $viewpic = $("#ViewPic");
+    $(".nav a").each(function(){
+        $(this).on("click",function(){
+            //显示对应的设计图
+            $viewpic.attr("src","images/"+$(this).attr("imgsrc"));
+            //页面滚动到顶
+            $("body").animate({scrollTop:0}, 200);
+            setTimeout(function(){
+//                console.log(document.body.clientWidth);
+//                console.log(document.body.scrollWidth);
+                var scrollLeft = document.body.scrollWidth - document.body.clientWidth;
+                if(scrollLeft>0){
+                    $("body").animate({scrollLeft:scrollLeft/2}, 200);
+                }
+            },10);
+        })
+    });
+
+    $("#GoHome").on("click",function(){
+        //显示介绍图
+        $viewpic.attr("src","images/introduce.png");
+        //页面滚动到顶
+        $("body").animate({scrollTop:0}, 200);
+    });
+    $("#SwitchNav").on("click",function(){
+        $(".nav").toggle(300,function(){
+            var img = $("#SwitchNav").find("img");
+            img.attr("src") == "images/leftup.png" ? img.attr("src","images/rightdown.png"):img.attr("src","images/leftup.png");
+        });
+    });
+</script>
+</html>
